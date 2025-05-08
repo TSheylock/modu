@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASOK - Эмоциональное зеркало</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.21.1/dist/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.8.0/dist/web3.min.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">S</span>
+                <span>SASOK</span>
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#knowledge" class="nav-item" data-tab="knowledge">
+                    <i class="fas fa-brain"></i>
+                    <span>Knowledge Graph</span>
+                </a>
+                <a href="#ai" class="nav-item" data-tab="ai">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Assistant</span>
+                </a>
+                <a href="#web3" class="nav-item" data-tab="web3">
+                    <i class="fas fa-cube"></i>
+                    <span>Web3</span>
+                </a>
+                <a href="#analytics" class="nav-item" data-tab="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </nav>
+            
+            <div class="controls-section">
+                <h3>Управление</h3>
+                <div class="control-item">
+                    <span>Эмоциональный режим</span>
+                    <label class="switch">
+                        <input type="checkbox" checked id="emotionToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="control-item">
+                    <span>Приватность данных</span>
+                    <label class="switch">
+                        <input type="checkbox" checked id="privacyToggle">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="emotional-state">
+                    <div class="emotion-label">Текущее состояние:</div>
+                    <div class="emotion-value" id="currentState">SASOK наблюдает, не интерпретирует</div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <section id="dashboard" class="tab-content active">
+                <h1>Панель управления SASOK</h1>
+                <div class="status-cards">
+                    <div class="status-card">
+                        <div class="emotional-balance">
+                            <h2>Эмоциональный баланс</h2>
+                            <div class="balance-container">
+                                <div class="balance-meter">
+                                    <div class="meter-fill" style="width: 65%;"></div>
+                                </div>
+                                <div class="balance-value">65.32 EMO</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="status-card">
+                        <div class="system-status">
+                            <h2>Статус системы</h2>
+                            <div class="status-item">
+                                <span>Emotion AI</span>
+                                <span class="status online">Онлайн</span>
+                            </div>
+                            <div class="status-item">
+                                <span>ASR Module</span>
+                                <span class="status online">Онлайн</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Web3</span>
+                                <span class="status online">Онлайн</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Neo4j Graph</span>
+                                <span class="status online">Онлайн</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>Эмоциональная динамика</h3>
+                        <canvas id="emotionChart"></canvas>
+                    </div>
+                    
+                    <div class="widget">
+                        <h3>Активность пользователя</h3>
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                    
+                    <div class="widget">
+                        <h3>Недавние взаимодействия</h3>
+                        <div class="interaction-list">
+                            <div class="interaction-item">
+                                <div class="interaction-time">14:23</div>
+                                <div class="interaction-content">
+                                    <div class="interaction-type">Текстовый ввод</div>
+                                    <div class="interaction-data">"Как работает эмоциональное отражение в SASOK?"</div>
+                                </div>
+                            </div>
+                            <div class="interaction-item">
+                                <div class="interaction-time">14:20</div>
+                                <div class="interaction-content">
+                                    <div class="interaction-type">Голосовой ввод</div>
+                                    <div class="interaction-data">"Запрос на анализ эмоций"</div>
+                                </div>
+                            </div>
+                            <div class="interaction-item">
+                                <div class="interaction-time">14:15</div>
+                                <div class="interaction-content">
+                                    <div class="interaction-type">Система</div>
+                                    <div class="interaction-data">Сессия начата</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Knowledge Graph Tab -->
+            <section id="knowledge" class="tab-content">
+                <h1>Семантическая карта памяти SASOK</h1>
+                <div class="knowledge-controls">
+                    <div class="search-box">
+                        <input type="text" placeholder="Поиск по графу знаний...">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+                    <div class="filter-controls">
+                        <button class="filter-btn active" data-filter="all">Все</button>
+                        <button class="filter-btn" data-filter="emotion">Эмоции</button>
+                        <button class="filter-btn" data-filter="module">Модули</button>
+                        <button class="filter-btn" data-filter="training">Данные обучения</button>
+                        <button class="filter-btn" data-filter="dependency">Зависимости</button>
+                    </div>
+                </div>
+                
+                <div class="graph-container">
+                    <div id="knowledgeGraph"></div>
+                    <div class="graph-info-panel">
+                        <h3>Информация о узле</h3>
+                        <div id="nodeInfo">
+                            <p>Выберите узел на графе для просмотра информации</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="legend">
+                    <h3>Легенда</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #4e73df;"></div>
+                        <div class="legend-label">Компоненты системы</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #1cc88a;"></div>
+                        <div class="legend-label">Эмоциональные состояния</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #f6c23e;"></div>
+                        <div class="legend-label">Модули обработки</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #e74a3b;"></div>
+                        <div class="legend-label">Зависимости</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #858796;"></div>
+                        <div class="legend-label">Наборы данных</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- AI Assistant Tab -->
+            <section id="ai" class="tab-content">
+                <h1>AI Ассистент с Садомазохистской Экономикой</h1>
+                
+                <div class="economy-status">
+                    <div class="economy-card">
+                        <h3>Статус экономики</h3>
+                        <div class="economy-meters">
+                            <div class="meter">
+                                <span>Коллективная паранойя</span>
+                                <div class="meter-bar">
+                                    <div class="meter-progress" style="width: 34%;" data-value="34"></div>
+                                </div>
+                                <span class="meter-value">34%</span>
+                            </div>
+                            <div class="meter">
+                                <span>Эмоциональная инфляция</span>
+                                <div class="meter-bar">
+                                    <div class="meter-progress" style="width: 62%;" data-value="62"></div>
+                                </div>
+                                <span class="meter-value">62%</span>
+                            </div>
+                            <div class="meter">
+                                <span>Стабильность системы</span>
+                                <div class="meter-bar">
+                                    <div class="meter-progress" style="width: 78%;" data-value="78"></div>
+                                </div>
+                                <span class="meter-value">78%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="economy-card">
+                        <h3>Ваш капитал боли</h3>
+                        <div class="pain-capital">
+                            <div class="capital-value">427.8</div>
+                            <div class="capital-trend positive">+12.4 <i class="fas fa-arrow-up"></i></div>
+                        </div>
+                        <button class="exchange-btn">Обменять боль на ресурсы</button>
+                    </div>
+                </div>
+                
+                <div class="economy-mechanics">
+                    <h2>Активные механики</h2>
+                    <div class="mechanics-list">
+                        <div class="mechanic-item active">
+                            <div class="mechanic-icon"><i class="fas fa-users-slash"></i></div>
+                            <div class="mechanic-info">
+                                <h4>Коллективная паранойя</h4>
+                                <p>51% пользователей испытывают страх — метавселенная рушится</p>
+                            </div>
+                            <div class="mechanic-status">Активна</div>
+                        </div>
+                        <div class="mechanic-item active">
+                            <div class="mechanic-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="mechanic-info">
+                                <h4>Эмоциональная инфляция</h4>
+                                <p>Чем больше пользователей испытывают радость, тем быстрее обесцениваются награды</p>
+                            </div>
+                            <div class="mechanic-status">Активна</div>
+                        </div>
+                        <div class="mechanic-item">
+                            <div class="mechanic-icon"><i class="fas fa-exchange-alt"></i></div>
+                            <div class="mechanic-info">
+                                <h4>Капитал боли</h4>
+                                <p>Обмен негативных эмоций на редкие ресурсы (курс ухудшается с каждым обменом)</p>
+                            </div>
+                            <div class="mechanic-status">Доступна</div>
+                        </div>
+                        <div class="mechanic-item inactive">
+                            <div class="mechanic-icon"><i class="fas fa-balance-scale"></i></div>
+                            <div class="mechanic-info">
+                                <h4>Парадокс жадности</h4>
+                                <p>Штрафы для всех, если слишком много пользователей одновременно пытаются заработать</p>
+                            </div>
+                            <div class="mechanic-status">Неактивна</div>
+                        </div>
+                        <div class="mechanic-item active">
+                            <div class="mechanic-icon"><i class="fas fa-wave-square"></i></div>
+                            <div class="mechanic-info">
+                                <h4>Эхо-контроль</h4>
+                                <p>Действия каждого пользователя влияют на общую стабильность экономики</p>
+                            </div>
+                            <div class="mechanic-status">Активна</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="ai-interface">
+                    <div class="chat-container">
+                        <div class="chat-history" id="chatHistory">
+                            <div class="message system">
+                                SASOK инициализирован. Садомазохистская экономика активна.
+                            </div>
+                            <div class="message assistant">
+                                Привет! Я SASOK, ваше эмоциональное зеркало. Взаимодействие со мной влияет на экономику системы. Каждая эмоция имеет свою цену и последствия.
+                            </div>
+                        </div>
+                        
+                        <div class="input-area">
+                            <button class="voice-btn"><i class="fas fa-microphone"></i></button>
+                            <input type="text" id="userInput" placeholder="Введите сообщение...">
+                            <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="emotion-feedback">
+                        <h3>Эмоциональная обратная связь</h3>
+                        <div class="emotion-grid">
+                            <div class="emotion-cell">
+                                <div class="emotion-icon">😡</div>
+                                <div class="emotion-label">Злость</div>
+                                <div class="emotion-value">4%</div>
+                            </div>
+                            <div class="emotion-cell">
+                                <div class="emotion-icon">😢</div>
+                                <div class="emotion-label">Грусть</div>
+                                <div class="emotion-value">12%</div>
+                            </div>
+                            <div class="emotion-cell">
+                                <div class="emotion-icon">😊</div>
+                                <div class="emotion-label">Радость</div>
+                                <div class="emotion-value">53%</div>
+                            </div>
+                            <div class="emotion-cell">
+                                <div class="emotion-icon">😨</div>
+                                <div class="emotion-label">Страх</div>
+                                <div class="emotion-value">8%</div>
+                            </div>
+                            <div class="emotion-cell">
+                                <div class="emotion-icon">😐</div>
+                                <div class="emotion-label">Нейтральность</div>
+                                <div class="emotion-value">23%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Web3 Tab -->
+            <section id="web3" class="tab-content">
+                <h1>Web3 Интеграция</h1>
+                
+                <div class="wallet-connection">
+                    <div class="connection-status">
+                        <h3>Статус подключения</h3>
+                        <div class="status not-connected" id="walletStatus">
+                            <i class="fas fa-unlink"></i>
+                            <span>Не подключено</span>
+                        </div>
+                        <button class="connect-btn" id="connectWallet">Подключить кошелек</button>
+                    </div>
+                    
+                    <div class="wallet-info hidden" id="walletInfo">
+                        <h3>Информация о кошельке</h3>
+                        <div class="info-item">
+                            <span>Адрес:</span>
+                            <span id="walletAddress">0x...</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Сеть:</span>
+                            <span id="networkName">Sepolia</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Баланс ETH:</span>
+                            <span id="ethBalance">0.0</span>
+                        </div>
+                        <div class="info-item">
+                            <span>Emotional ID NFTs:</span>
+                            <span id="nftCount">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="nft-section hidden" id="nftSection">
+                    <h2>Эмоциональные NFT идентичности</h2>
+                    <div class="nft-gallery" id="nftGallery">
+                        <!-- NFTs will be inserted here -->
+                    </div>
+                    <div class="nft-actions">
+                        <button class="action-btn" id="mintNFT">
+                            <i class="fas fa-plus-circle"></i>
+                            Создать Emotional ID NFT
+                        </button>
+                        <button class="action-btn" id="updateNFT">
+                            <i class="fas fa-sync"></i>
+                            Обновить эмоциональные данные
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="blockchain-activity">
+                    <h2>Активность в блокчейне</h2>
+                    <div class="activity-list" id="blockchainActivity">
+                        <div class="activity-item">
+                            <div class="activity-icon"><i class="fas fa-clock"></i></div>
+                            <div class="activity-info">
+                                <h4>Ожидание подключения кошелька</h4>
+                                <p>Подключите кошелек для просмотра активности в блокчейне</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dao-voting hidden" id="daoSection">
+                    <h2>DAO голосование</h2>
+                    <div class="dao-info">
+                        <p>DAO голосование доступно только после анализа эмоциональной когерентности участников</p>
+                    </div>
+                    <div class="proposal-list" id="proposalList">
+                        <!-- Proposals will be loaded here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Analytics Tab -->
+            <section id="analytics" class="tab-content">
+                <h1>Аналитика</h1>
+                
+                <div class="analytics-filters">
+                    <div class="filter-group">
+                        <label>Временной период:</label>
+                        <select id="timeFilter">
+                            <option value="day">День</option>
+                            <option value="week" selected>Неделя</option>
+                            <option value="month">Месяц</option>
+                            <option value="year">Год</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Тип данных:</label>
+                        <select id="dataTypeFilter">
+                            <option value="emotions" selected>Эмоции</option>
+                            <option value="interactions">Взаимодействия</option>
+                            <option value="economy">Экономика</option>
+                        </select>
+                    </div>
+                    <button class="apply-filters">Применить</button>
+                </div>
+                
+                <div class="analytics-widgets">
+                    <div class="analytics-widget full-width">
+                        <h3>Динамика эмоциональных состояний</h3>
+                        <canvas id="emotionTrendsChart"></canvas>
+                    </div>
+                    
+                    <div class="analytics-widget">
+                        <h3>Распределение эмоций</h3>
+                        <canvas id="emotionDistributionChart"></canvas>
+                    </div>
+                    
+                    <div class="analytics-widget">
+                        <h3>Экономические показатели</h3>
+                        <canvas id="economyMetricsChart"></canvas>
+                    </div>
+                    
+                    <div class="analytics-widget">
+                        <h3>Типы взаимодействий</h3>
+                        <canvas id="interactionTypesChart"></canvas>
+                    </div>
+                    
+                    <div class="analytics-widget">
+                        <h3>Эффективность обучения</h3>
+                        <canvas id="learningEfficiencyChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="data-export">
+                    <h3>Экспорт данных</h3>
+                    <div class="export-options">
+                        <button class="export-btn" data-format="csv">
+                            <i class="fas fa-file-csv"></i>
+                            CSV
+                        </button>
+                        <button class="export-btn" data-format="json">
+                            <i class="fas fa-file-code"></i>
+                            JSON
+                        </button>
+                        <button class="export-btn" data-format="pdf">
+                            <i class="fas fa-file-pdf"></i>
+                            PDF
+                        </button>
+                    </div>
+                    <div class="privacy-note">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Все данные экспортируются в зашифрованном виде с соблюдением приватности</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="scripts/main.js"></script>
+    <script src="scripts/knowledge-graph.js"></script>
+    <script src="scripts/ai-assistant.js"></script>
+    <script src="scripts/web3-integration.js"></script>
+    <script src="scripts/analytics.js"></script>
+</body>
+</html>
