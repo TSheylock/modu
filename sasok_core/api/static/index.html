@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASOK - Визуализация семантической сети</title>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app-container">
+        <div id="header">
+            <h3>SASOK - Визуализация семантической сети</h3>
+            <div>
+                <button id="btn-reload" class="btn btn-outline-light btn-sm">Обновить граф</button>
+            </div>
+        </div>
+        
+        <div id="main-content">
+            <div id="sidebar">
+                <div class="info-panel">
+                    <h5>Управление графом</h5>
+                    <div class="form-group">
+                        <label for="search-concept">Поиск концепта</label>
+                        <div class="input-group">
+                            <select id="search-concept" class="form-control">
+                                <option value="">Выберите концепт...</option>
+                            </select>
+                            <button id="btn-search-concept" class="btn btn-primary">Найти</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="search-emotion">Поиск эмоции</label>
+                        <div class="input-group">
+                            <select id="search-emotion" class="form-control">
+                                <option value="">Выберите эмоцию...</option>
+                            </select>
+                            <button id="btn-search-emotion" class="btn btn-primary">Найти</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="depth-range">Глубина обхода: <span id="depth-value">1</span></label>
+                        <input type="range" class="form-range" id="depth-range" min="1" max="3" value="1">
+                    </div>
+                </div>
+                
+                <div id="emotion-profile-container" class="info-panel" style="display: none;">
+                    <h5>Эмоциональный профиль</h5>
+                    <div id="emotion-profile" class="mt-2"></div>
+                </div>
+                
+                <div id="similar-concepts-container" class="info-panel" style="display: none;">
+                    <h5>Похожие концепты</h5>
+                    <div id="similar-concepts" class="mt-2"></div>
+                </div>
+                
+                <div id="node-info-container" class="node-info" style="display: none;">
+                    <h5>Информация о узле</h5>
+                    <div id="node-details"></div>
+                </div>
+            </div>
+            
+            <div id="cy-container">
+                <div id="cy"></div>
+                <div id="loading-overlay" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Загрузка...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="status-bar">
+            <span id="status-message">Готов к работе</span>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
