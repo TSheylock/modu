@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  # Frontend приложение
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://backend:3001
+    depends_on:
+      - backend
+      - redis
+      - mongodb
+
+  # Backend сервер
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/saske
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=your_jwt_secret
+      - PORT=3001
+    depends_on:
+      - mongodb
+      - redis
+
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+
+  # Redis
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # IPFS
+  ipfs:
+    image: ipfs/kubo:latest
+    ports:
+      - "4001:4001"
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ipfs_data:/data/ipfs
+
+  # Ethereum node (для разработки)
+  ethereum:
+    image: trufflesuite/ganache:latest
+    ports:
+      - "8545:8545"
+    environment:
+      - GANACHE_MNEMONIC=your_mnemonic_phrase
+      - GANACHE_DB_PATH=/data/ganache
+    volumes:
+      - ganache_data:/data/ganache
+
+volumes:
+  mongodb_data:
+  redis_data:
+  ipfs_data:
+  ganache_data: 
