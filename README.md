@@ -1,108 +1,117 @@
-# Emotion Diary с интеграцией блокчейна Saske
+# SASOK_— Emotional AI Backend (Powered by Xano)
 
-Приложение для анализа эмоций с использованием ИИ и блокчейна Saske для хранения и токенизации эмоциональных данных.
+> 🧠 SASOK-is a modular backend system designed to support emotionally-aware interfaces, Web3 identity, and DAO governance using an emotion-driven data architecture.
 
-## Возможности
+---
 
-- Анализ эмоций с использованием различных модальностей (текст, аудио, видео)
-- Визуализация эмоциональных данных в виде графов
-- Создание NFT токенов эмоций в блокчейне Saske
-- Хранение истории эмоций в децентрализованном хранилище
-- Анализ трендов и паттернов эмоций
+## 🔍 Overview
 
-## Технологии
+**SASOK_** is the emotional backbone of a Web3 application that merges artificial intelligence, affective computing, and decentralized governance. Built on top of **Xano**, it provides an API-first infrastructure with an extendable, real-time database, modular logic layers, and native support for identity, behavior tracking, and emotional analytics.
 
-- React + TypeScript для фронтенда
-- Solidity для смарт-контрактов
-- Hardhat для разработки и деплоя
-- IPFS для хранения данных
-- Ethers.js и Web3.js для взаимодействия с блокчейном
-- Chart.js и vis-network для визуализации
-- NLP библиотеки для анализа текста
+---
 
-## Установка
+## 📐 System Architecture
 
-1. Клонируйте репозиторий:
-```bash
-git clone https://github.com/your-username/emotion-diary.git
-cd emotion-diary
-```
+Frontend (React / Flutter / WebView)
+|
+v
+[ Xano API ]
+|
++--> User & Identity Tables
++--> Emotional Engine (AI model versioning)
++--> DAO Layer (Proposal + Voting)
++--> Notification System
++--> IPFS Event Logging
 
-2. Установите зависимости:
-```bash
-npm install
-```
+---
 
-3. Создайте файл .env на основе .env.example:
-```bash
-cp .env.example .env
-```
+## 🗂️ Database Tables
 
-4. Заполните необходимые переменные окружения в .env:
-- PRIVATE_KEY - приватный ключ для подписи транзакций
-- SASKE_MAINNET_RPC_URL - RPC URL для сети Saske Mainnet
-- SASKE_TESTNET_RPC_URL - RPC URL для сети Saske Testnet
-- IPFS_API_KEY - API ключ для IPFS
-- ETHERSCAN_API_KEY - API ключ для верификации контрактов
+| Table Name            | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| `user`                | Stores user credentials, preferences, and emotional fingerprint             |
+| `identity_log`        | Tracks user interactions and emotional state analytics                      |
+| `dao_proposal`        | Stores DAO proposals with metadata                                          |
+| `dao_vote`            | Records user votes linked to proposals with optional emotional weighting    |
+| `emotional_sbt`       | Links Soulbound Tokens to emotional states and identity events              |
+| `ipfs_event`          | Logs decentralized file events and object hashes                            |
+| `notification`        | Manages in-app and email notification delivery                              |
+| `scheduled_event`     | Supports scheduled user or system actions (e.g. reminders, triggers)        |
+| `ai_model_version`    | Tracks deployed AI versions influencing emotional logic                     |
+| `emotional_milestone` | Captures user goal or emotion-driven achievements                           |
 
-## Разработка
+---
 
-1. Запустите локальный сервер разработки:
-```bash
-npm run dev
-```
+## 🔌 API Endpoints
 
-2. Скомпилируйте смарт-контракты:
-```bash
-npm run compile
-```
+Xano automatically generates RESTful endpoints for all tables. You can:
+- **GET** data (`/user`, `/dao_vote`)
+- **POST** new entries (e.g., `/identity_log`)
+- **PATCH/PUT** updates (e.g., `/emotional_sbt`)
+- **DELETE** entries if authorized
 
-3. Запустите тесты:
-```bash
-npm run test
-```
+> Authentication: Supports JWT tokens, API keys, and session-based auth.
 
-## Деплой
+---
 
-### Testnet
+## 🔗 Integrations
 
-1. Деплой смарт-контрактов в тестовую сеть:
-```bash
-npm run deploy:testnet
-```
+You can connect this backend with:
+- ✅ **No-code** tools (e.g., FlutterFlow, Webflow, Adalo)
+- ✅ **React / Vue** frontends
+- ✅ **LangChain / FastAPI** for AI logic
+- ✅ **BI tools** (e.g., Retool, Metabase)
+- ✅ **IPFS / Web3 SDKs** for decentralized content
 
-2. Верификация контрактов:
-```bash
-npm run verify:testnet
-```
+---
 
-### Mainnet
+## 🧠 Emotional Intelligence Use Cases
 
-1. Деплой смарт-контрактов в основную сеть:
-```bash
-npm run deploy:mainnet
-```
+- Generate **emotional fingerprints** for personalization
+- Use **identity logs** to track emotional journey
+- Issue **SBTs** (Soulbound Tokens) tied to emotional data
+- Govern decisions with **DAO voting systems** weighted by affective states
+- Sync AI engine upgrades via `ai_model_version`
 
-2. Верификация контрактов:
-```bash
-npm run verify:mainnet
-```
+---
 
-## Структура проекта
+### 4. Configure Auth
+Set up JWT, API keys, or external OAuth (Google, Web3 wallet, etc.)
 
-```
-emotion-diary/
-├── src/
-│   ├── components/     # React компоненты
-│   ├── contracts/      # Смарт-контракты
-│   ├── utils/          # Утилиты
-│   └── pages/          # Next.js страницы
-├── scripts/            # Скрипты деплоя
-├── test/               # Тесты
-├── hardhat.config.ts   # Конфигурация Hardhat
-└── package.json        # Зависимости и скрипты
-```
+### 5. Test Workflow
+Use Xano’s built-in API tester or Postman to validate routes and emotional logic.
 
-## Лицензия
+---
 
-MIT 
+## 🧰 Developer Notes
+
+- Workspace is fully modular — customize logic flows using Xano Functions.
+- Future support for WebSockets and real-time emotional state mapping planned.
+- Analytics layer can be extended with Supabase or Dune for on-chain analytics.
+
+---
+
+## 📄 License
+
+This project backend is proprietary and part of the SASOK ecosystem.
+
+---
+
+## 🤝 Contributing
+
+If you’re working within the SASOK development network:
+- Use `/api/emotional_milestone` to sync progress
+- Use dev branches for model changes in `ai_model_version`
+
+---
+
+## ✉️ Contact
+
+Product Owner: **Sheylock**  
+Cognitive Systems Architect & Web3 AI Strategist  
+📧 hello@sasok.xyz  
+🌐 [saske.xyz](https://saske.xyz) | [evorin.io](https://evorin.io)
+
+---
+
+> "SASOK doesn't predict your emotions. It evolves with them."
