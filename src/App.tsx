@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { SASOKIntegration } from './integration/SASOKIntegration';
 import './App.css';
-
-// Dynamic imports for browser-only libraries
-const loadFaceApi = () => import('face-api.js');
-const loadMeyda = () => import('meyda');
 
 interface EmotionData {
   valence: number;
@@ -21,10 +18,12 @@ const toPercent = (v: number) => `${((v + 1) * 50).toFixed(0)}%`;
 const App: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [emotion, setEmotion] = useState<EmotionData | null>(null);
+  const sasokRef = useRef<SASOKIntegration | null>(null);
 
-  // Initialize camera stream
+  // Initialize camera & SASOK
   useEffect(() => {
-    const initCamera = async () => {
+    const init = async () => {
+      // Camera
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: 'user' },
@@ -34,24 +33,24 @@ const App: React.FC = () => {
         }
       } catch (err) {
         console.error('Error accessing camera', err);
+        return;
       }
-    };
-    initCamera();
-  }, []);
 
-  // Dummy timer to update emotion state every second (placeholder)
-  useEffect(() => {
-    const id = setInterval(() => {
-      // random values for demo
-      setEmotion({
-        valence: Math.random() * 2 - 1,
-        arousal: Math.random() * 2 - 1,
-        stress: Math.random(),
-        confidence: Math.random(),
-        emotionLabel: 'neutral',
+      // SASOK integration
+      if (!videoRef.current) return;
+      const integration = new SASOKIntegration({
+        onEmotion: (data) => setEmotion(data),
       });
-    }, 1000);
-    return () => clearInterval(id);
+      await integration.initialize(videoRef.current);
+      integration.start();
+      sasokRef.current = integration;
+    };
+
+    init();
+
+    return () => {
+      sasokRef.current?.stop();
+    };
   }, []);
 
   return (
