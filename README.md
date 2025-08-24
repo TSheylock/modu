@@ -1,5 +1,8 @@
 # Emotion Diary с интеграцией блокчейна Saske
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/65b8202b809142cc9b44d4c02fe9bc70)](https://app.codacy.com/gh/TSheylock/modu?utm_source=github.com&utm_medium=referral&utm_content=TSheylock/modu&utm_campaign=Badge_Grade)
+
+
 Приложение для анализа эмоций с использованием ИИ и блокчейна Saske для хранения и токенизации эмоциональных данных.
 
 ## Возможности
