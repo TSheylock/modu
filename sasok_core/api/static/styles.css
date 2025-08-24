@@ -1,0 +1,125 @@
+/* Основные стили для SASOK - Визуализация семантической сети */
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+#header {
+    background-color: #343a40;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+#sidebar {
+    width: 350px;
+    background-color: #f1f1f1;
+    padding: 15px;
+    overflow-y: auto;
+    border-right: 1px solid #ddd;
+}
+
+#cy-container {
+    flex: 1;
+    position: relative;
+}
+
+#cy {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.emotion-profile-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.progress {
+    height: 8px;
+}
+
+#loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.info-panel {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.node-info {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+}
+
+.badge-emotion {
+    background-color: #FFC300;
+    color: black;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-left: 5px;
+}
+
+.badge-concept {
+    background-color: #33FF57;
+    color: black;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-left: 5px;
+}
+
+.badge-property {
+    background-color: #33A8FF;
+    color: black;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    margin-left: 5px;
+}
+
+#status-bar {
+    background-color: #e9ecef;
+    padding: 5px 15px;
+    font-size: 0.9em;
+    border-top: 1px solid #ddd;
+}
