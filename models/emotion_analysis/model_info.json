@@ -1,0 +1,16 @@
+{
+  "name": "emotion_analysis",
+  "type": "rule_based",
+  "params": {
+    "confidence_threshold": 0.7,
+    "adaptation_rate": 0.05
+  },
+  "training_stats": {
+    "epochs": 5,
+    "final_loss": 0.2799999999999999,
+    "final_accuracy": 0.8600000000000001,
+    "training_time": 5,
+    "completed_at": "2025-05-08T09:08:55.804478"
+  },
+  "created_at": "2025-05-08T09:08:55.805227"
+}

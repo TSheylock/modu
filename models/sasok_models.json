@@ -1,0 +1,10 @@
+{
+  "models": {
+    "emotion_analysis": {
+      "info_path": "models/emotion_analysis/model_info.json",
+      "integrated_at": "2025-05-08T09:08:55.805826",
+      "rules_path": "models/emotion_analysis/rules.json"
+    }
+  },
+  "last_updated": "2025-05-08T09:08:55.805758"
+}
