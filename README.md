@@ -1,4 +1,4 @@
-# SASOK_— Emotional AI Backend (Powered by Xano)
+# SASOK_— Emotional AI Backend (Powered by TSheylock)
 
 > 🧠 SASOK-is a modular backend system designed to support emotionally-aware interfaces, Web3 identity, and DAO governance using an emotion-driven data architecture.
 
