@@ -397,3 +397,10 @@ class ReflectionModule(BaseModule):
                     "source": "reflection_module",
                     "system_state": system_state
                 })
+
+                await asyncio.sleep(1800)  # каждые 30 минут
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Ошибка периодической рефлексии: {e}")
+                await asyncio.sleep(60)

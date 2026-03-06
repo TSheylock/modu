@@ -1,0 +1,101 @@
+# SASOK — Symbiotic Autonomous Self-Organizing Consciousness
+# Конфигурация системы v0.1.0
+
+system:
+  name: "SASOK"
+  version: "0.1.0"
+  debug: true
+  author: "Teymur Safiulov"
+
+modules:
+  enabled:
+    - emotion
+    - reflection
+    - memory
+    - ethics
+    - dream
+    - motivation
+    - sasok_chain
+    - cognitive_migration
+    - zk_identity
+    - snn_decoder
+    - symbiotic_engine
+    - emotional_id
+
+event_bus:
+  type: "nats"
+  servers:
+    - "nats://localhost:4222"
+
+logging:
+  level: "INFO"
+  path: "logs/system.log"
+
+storage:
+  type: "sqlite"
+  path: "data/sasok.db"
+
+xocore:
+  fusion_weights:
+    face: 0.25
+    voice: 0.20
+    text: 0.20
+    physio: 0.15
+    behavior: 0.10
+    wifi: 0.10
+  coherence_threshold: 0.7
+  trend_window: 10
+
+wifi_csi:
+  mode: "auto"  # auto | rssi | csi | simulated
+  scan_interval: 1.0
+  breathing_band: [0.15, 0.5]
+  heartrate_band: [0.8, 2.5]
+  presence_threshold: -75
+
+sasok_chain:
+  block_interval: 30  # секунд между блоками
+  max_tx_per_block: 20
+  empathy_threshold: 0.6
+  min_validators: 2
+  storage_path: "data/sasok_chain.db"
+
+cognitive_migration:
+  storage_path: "data/cognitive_migration.db"
+  snapshot_encryption: true
+  uniqueness_guarantee: true
+  max_rollback_history: 10
+
+zk_identity:
+  protocol: "ZK-HashChain"
+  proof_expiry_seconds: 300
+  auto_create_identity: true
+  storage_path: "data/zk_identity.db"
+
+snn_decoder:
+  simulation_duration_ms: 100
+  dt_ms: 0.5
+  architecture: "3-layer LIF (6-12-7)"
+  lateral_inhibition: true
+  stdp_enabled: true
+
+symbiotic_engine:
+  resonance_threshold: 0.65
+  learning_rate: 0.05
+  metrics_interval_seconds: 600
+  storage_path: "data/symbiotic_engine.db"
+
+emotional_id:
+  standard: "ERC-721 SBT"
+  fingerprint_samples: 24
+  evolution_threshold: 0.15
+  fingerprint_interval_seconds: 300
+  storage_path: "data/emotional_id.db"
+
+perception:
+  camera:
+    enabled: false
+    resolution: [640, 480]
+  microphone:
+    enabled: false
+    sample_rate: 16000

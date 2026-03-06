@@ -1,7 +1,3 @@
-
-## Модуль памяти (modules/memory/memory_module.py)
-
-```python
 """
 Модуль памяти SASOK.
 Долговременное хранение ключевых событий, состояний, уроков и опыта.
@@ -732,4 +728,71 @@ class MemoryModule(BaseModule):
                 "source": "emotion_module",
                 "episode": {
                     "type": "emotion",
-                    "content": f"Значимое эмоциональное состояние
+                    "content": f"Значимое эмоциональное состояние: {max_emotion[0]} ({max_emotion[1]:.2f})",
+                    "importance": max_emotion[1],
+                    "tags": [max_emotion[0], "emotion", "auto"],
+                    "metadata": {"emotions": emotions, "context": data.get("context", "unknown")}
+                }
+            })
+
+    async def _on_interaction_completed(self, msg):
+        """Обработчик события завершения взаимодействия."""
+        data = json.loads(msg.data.decode())
+        await self.process({
+            "type": "memory_store",
+            "source": "interaction_module",
+            "episode": {
+                "type": "interaction",
+                "content": data.get("summary", "Взаимодействие завершено"),
+                "importance": data.get("importance", 0.5),
+                "tags": ["interaction", "auto"],
+                "metadata": data
+            }
+        })
+
+    async def _on_reflection_insight(self, msg):
+        """Обработчик события генерации инсайта рефлексии."""
+        data = json.loads(msg.data.decode())
+        await self.process({
+            "type": "memory_store",
+            "source": "reflection_module",
+            "episode": {
+                "type": "reflection",
+                "content": data.get("insight", ""),
+                "importance": data.get("importance", 0.6),
+                "tags": ["reflection", "insight", "auto"],
+                "metadata": data
+            }
+        })
+
+    async def _on_decision_made(self, msg):
+        """Обработчик события принятия решения."""
+        data = json.loads(msg.data.decode())
+        await self.process({
+            "type": "memory_store",
+            "source": "decision_module",
+            "episode": {
+                "type": "decision",
+                "content": data.get("description", "Принято решение"),
+                "importance": data.get("importance", 0.7),
+                "tags": ["decision", "auto"],
+                "metadata": data
+            }
+        })
+
+    async def _periodic_memory_consolidation(self):
+        """Периодическая консолидация памяти — усиление важных эпизодов."""
+        while self.active:
+            try:
+                await asyncio.sleep(3600)  # каждый час
+                self.logger.info("Запуск периодической консолидации памяти...")
+                episodes = self.episodic_memory.search_episodes({}, 100)
+                for ep in episodes:
+                    if ep and len(ep.get("relations", [])) > 3:
+                        new_importance = min(1.0, ep["importance"] + 0.05)
+                        self.episodic_memory.update_episode_importance(ep["id"], new_importance)
+                self.logger.info("Консолидация памяти завершена")
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Ошибка консолидации памяти: {e}")

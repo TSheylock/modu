@@ -86,40 +86,119 @@ class CoreManager:
             self.logger.error(f"Ошибка инициализации шины событий: {e}")
             raise
     
+    async def initialize(self):
+        """Инициализация всех компонентов ядра (вызывается перед start)."""
+        self.logger.info("SASOK_INIT: Подготовка компонентов ядра...")
+        # Предзагрузка модулей без активации
+        await self.load_modules()
+        self.logger.info("SASOK_INIT: Компоненты ядра подготовлены")
+
     async def load_modules(self):
         """Загрузка всех модулей из конфигурации."""
-        enabled_modules = self.config["modules"]["enabled"]
-        
+        enabled_modules = self.config.get("modules", {}).get("enabled",
+            ["emotion", "reflection", "memory", "ethics"])
+
         for module_name in enabled_modules:
             try:
                 # Динамическая загрузка модуля
                 module_class = self._get_module_class(module_name)
-                module_instance = module_class(self.event_bus, self.config)
-                self.modules[module_name] = module_instance
-                self.logger.info(f"SASOK_MODULE_LOAD: Модуль {module_name} загружен")
+                if module_class:
+                    module_instance = module_class(self.event_bus, self.config)
+                    self.modules[module_name] = module_instance
+                    self.logger.info(f"SASOK_MODULE_LOAD: Модуль {module_name} загружен")
             except Exception as e:
-                self.logger.error(f"Ошибка загрузки модуля {module_name}: {e}")
-    
+                self.logger.warning(f"Модуль {module_name} не загружен (degraded): {e}")
+
     def _get_module_class(self, module_name: str):
         """Получение класса модуля по его имени."""
-        # Это будет расширено для динамической загрузки модулей
-        # Временная заглушка для примера
-        from modules.emotion.emotion_module import EmotionModule
-        from modules.reflection.reflection_module import ReflectionModule
-        from modules.memory.memory_module import MemoryModule
-        from modules.ethics.ethics_module import EthicsModule
-        
-        module_mapping = {
-            "emotion": EmotionModule,
-            "reflection": ReflectionModule,
-            "memory": MemoryModule,
-            "ethics": EthicsModule
-        }
-        
+        module_mapping = {}
+
+        try:
+            from modules.reflection.reflection_module import ReflectionModule
+            module_mapping["reflection"] = ReflectionModule
+        except ImportError as e:
+            self.logger.warning(f"reflection: {e}")
+
+        try:
+            from modules.memory.memory_module import MemoryModule
+            module_mapping["memory"] = MemoryModule
+        except ImportError as e:
+            self.logger.warning(f"memory: {e}")
+
+        try:
+            from modules.ethics.ethics_module import EthicsModule
+            module_mapping["ethics"] = EthicsModule
+        except ImportError as e:
+            self.logger.warning(f"ethics: {e}")
+
+        try:
+            from modules.emotion.emotion_module import EmotionModule
+            module_mapping["emotion"] = EmotionModule
+        except ImportError:
+            # Fallback: создадим обёрточный модуль из emotion_analysis
+            try:
+                from modules.emotion.emotion_adapter import EmotionModuleAdapter
+                module_mapping["emotion"] = EmotionModuleAdapter
+            except ImportError as e:
+                self.logger.warning(f"emotion: {e}")
+
+        try:
+            from modules.dream.dream_adapter import DreamModule
+            module_mapping["dream"] = DreamModule
+        except ImportError:
+            try:
+                from modules.dream.dream_module import DreamModule
+                module_mapping["dream"] = DreamModule
+            except ImportError as e:
+                self.logger.warning(f"dream: {e}")
+
+        try:
+            from modules.motivation.motivation_module import MotivationModule
+            module_mapping["motivation"] = MotivationModule
+        except ImportError as e:
+            self.logger.warning(f"motivation: {e}")
+
+        try:
+            from modules.sasok_chain.sasok_chain_module import SASOKChainModule
+            module_mapping["sasok_chain"] = SASOKChainModule
+        except ImportError as e:
+            self.logger.warning(f"sasok_chain: {e}")
+
+        try:
+            from modules.cognitive_migration.migration_module import CognitiveMigrationModule
+            module_mapping["cognitive_migration"] = CognitiveMigrationModule
+        except ImportError as e:
+            self.logger.warning(f"cognitive_migration: {e}")
+
+        try:
+            from modules.zk_identity.zk_identity_module import ZKIdentityModule
+            module_mapping["zk_identity"] = ZKIdentityModule
+        except ImportError as e:
+            self.logger.warning(f"zk_identity: {e}")
+
+        try:
+            from modules.snn_decoder.snn_module import SNNDecoderModule
+            module_mapping["snn_decoder"] = SNNDecoderModule
+        except ImportError as e:
+            self.logger.warning(f"snn_decoder: {e}")
+
+        try:
+            from modules.symbiotic_engine.symbiotic_module import SymbioticEngineModule
+            module_mapping["symbiotic_engine"] = SymbioticEngineModule
+        except ImportError as e:
+            self.logger.warning(f"symbiotic_engine: {e}")
+
+        try:
+            from modules.emotional_id.emotional_id_module import EmotionalIDModule
+            module_mapping["emotional_id"] = EmotionalIDModule
+        except ImportError as e:
+            self.logger.warning(f"emotional_id: {e}")
+
         if module_name in module_mapping:
             return module_mapping[module_name]
         else:
-            raise ValueError(f"Модуль {module_name} не реализован")
+            self.logger.warning(f"Модуль {module_name} не реализован")
+            return None
     
     async def start(self):
         """Запуск SASOK."""
@@ -146,7 +225,7 @@ class CoreManager:
             self.logger.info("SASOK_READY: Система активна и готова к работе")
             
             # Публикация события о готовности системы
-            await self.event_bus.publish("system.ready", b"Система готова")
+            await self.event_bus.publish("system.ready", "Система готова".encode("utf-8"))
         except Exception as e:
             self.logger.error(f"Ошибка запуска SASOK: {e}")
             # Попытка корректного завершения работы при ошибке

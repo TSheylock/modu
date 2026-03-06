@@ -769,4 +769,76 @@ class MotivationModule(BaseModule):
         
         # Влияние качества взаимодействия на побуждения
         influences = {
-            "connection": 0.05 * (quality - 0.5) *
+            "connection": 0.05 * (quality - 0.5) * 2,
+            "growth": 0.03 * quality,
+            "meaning": 0.02 * quality
+        }
+
+        for drive_name, delta in influences.items():
+            await self.process({
+                "type": "drive_update",
+                "source": "interaction_module",
+                "drive": drive_name,
+                "delta": delta
+            })
+
+    async def _on_significant_memory(self, msg):
+        """Обработчик события значимого воспоминания."""
+        data = json.loads(msg.data.decode())
+        memory = data.get("memory", {})
+
+        # Значимые воспоминания повышают связь и понимание
+        influences = {
+            "connection": 0.03,
+            "understanding": 0.05,
+            "growth": 0.02
+        }
+
+        await self.process({
+            "type": "drive_influence",
+            "source": "memory_module",
+            "influences": influences
+        })
+
+        # Если воспоминание имеет высокую важность — предложить цель
+        if memory.get("importance", 0) > 0.8:
+            await self.process({
+                "type": "goal_proposal",
+                "source": "memory_module",
+                "goal": {
+                    "title": "Интеграция значимого опыта",
+                    "description": f"Обработка и интеграция: {memory.get('content', '')[:100]}",
+                    "priority": 0.65,
+                    "source": "memory_recall",
+                    "tags": memory.get("tags", [])
+                }
+            })
+
+    async def _periodic_motivation_update(self):
+        """Периодическое обновление мотивационного состояния."""
+        while self.active:
+            try:
+                # Естественное затухание побуждений к среднему (гомеостаз)
+                for drive_name, drive_data in self.drive_matrix.drives.items():
+                    current = drive_data["current_value"]
+                    baseline = 0.5
+                    decay = 0.01 * (current - baseline)
+                    self.drive_matrix.update_drive(drive_name, current - decay)
+
+                # Обновление состояния
+                await self._update_state()
+
+                self.logger.debug("Периодическое обновление мотивации выполнено")
+                await asyncio.sleep(900)  # каждые 15 минут
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                self.logger.error(f"Ошибка периодического обновления мотивации: {e}")
+                await asyncio.sleep(60)
+
+    async def _update_state(self):
+        """Обновление внутреннего состояния модуля."""
+        self.state["dominant_drives"] = self.drive_matrix.get_dominant_drives()
+        self.state["active_goals_count"] = len(self.goal_stack.get_active_goals())
+        self.state["top_values"] = self.value_weights.get_top_values()
+        await self.update_state(self.state)
