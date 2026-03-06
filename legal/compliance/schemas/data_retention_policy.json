@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SASOK Data Retention Schedule",
+  "type": "object",
+  "properties": {
+    "policy_version": {
+      "type": "string",
+      "description": "Version identifier (YYYY-MM-DD format)"
+    },
+    "last_reviewed": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "data_categories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category_id": {
+            "type": "string",
+            "enum": [
+              "user_profile",
+              "behavioral_logs",
+              "transaction_data",
+              "consent_records",
+              "support_communications",
+              "analytics_events",
+              "security_logs",
+              "backups"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "retention_period_days": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "justification": {
+            "type": "string",
+            "description": "Legal requirement, business purpose, or risk assessment"
+          },
+          "deletion_mechanism": {
+            "type": "string",
+            "enum": ["automated", "manual", "both"]
+          },
+          "deletion_method": {
+            "type": "string",
+            "description": "Secure deletion, anonymization, or archival"
+          },
+          "last_deletion_audit": {
+            "type": "string",
+            "format": "date"
+          },
+          "is_legally_required": {
+            "type": "boolean"
+          },
+          "legal_basis": {
+            "type": "string",
+            "description": "If legally required, cite law/regulation"
+          }
+        },
+        "required": ["category_id", "retention_period_days", "justification", "deletion_mechanism"]
+      }
+    }
+  },
+  "required": ["policy_version", "data_categories"]
+}

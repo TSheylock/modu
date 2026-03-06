@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SASOK AI System Inventory",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "model_id": {
+        "type": "string",
+        "description": "Unique AI model identifier"
+      },
+      "model_name": {
+        "type": "string"
+      },
+      "version": {
+        "type": "string",
+        "description": "Semantic versioning (e.g., 1.2.3)"
+      },
+      "use_case": {
+        "type": "string",
+        "description": "Primary business purpose"
+      },
+      "role": {
+        "type": "string",
+        "enum": ["provider", "deployer", "modifier"],
+        "description": "SASOK's role in AI value chain"
+      },
+      "risk_classification": {
+        "type": "string",
+        "enum": ["prohibited", "high_risk", "medium_risk", "low_risk"],
+        "description": "Per EU AI Act Article 6"
+      },
+      "is_gpai_model": {
+        "type": "boolean",
+        "description": "General-Purpose AI model (requires reporting)"
+      },
+      "is_systemic_gpai": {
+        "type": "boolean",
+        "description": "Systemic GPAI (highest obligations)"
+      },
+      "processing_categories": {
+        "type": "array",
+        "items": {
+          "enum": [
+            "personal_data_processing",
+            "behavioral_analysis",
+            "automated_decision_making",
+            "biometric_processing",
+            "emotion_recognition",
+            "content_moderation"
+          ]
+        }
+      },
+      "training_data": {
+        "type": "object",
+        "properties": {
+          "dataset_size": {
+            "type": "string",
+            "description": "Number of records/tokens used"
+          },
+          "includes_personal_data": {
+            "type": "boolean"
+          },
+          "gdpr_compliant_sourcing": {
+            "type": "boolean",
+            "description": "Data collected with user consent or legally justified"
+          },
+          "last_audit_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "prohibited_practices_check": {
+        "type": "object",
+        "properties": {
+          "emotion_recognition_workplace": {
+            "type": "boolean",
+            "description": "Infers emotions in workplace context (should be false)"
+          },
+          "emotion_recognition_education": {
+            "type": "boolean",
+            "description": "Infers emotions in education context (should be false)"
+          },
+          "biometric_categorization_sensitive": {
+            "type": "boolean",
+            "description": "Categorizes based on sensitive characteristics (should be false)"
+          },
+          "social_scoring": {
+            "type": "boolean",
+            "description": "Produces social credit scores (should be false)"
+          },
+          "manipulative_behavior_influence": {
+            "type": "boolean",
+            "description": "Manipulates without user awareness (should be false)"
+          },
+          "compliance_status": {
+            "type": "string",
+            "enum": ["PASS", "FAIL"],
+            "description": "All checks must be false (PASS)"
+          }
+        }
+      },
+      "documentation": {
+        "type": "object",
+        "properties": {
+          "architecture_documented": {
+            "type": "boolean"
+          },
+          "performance_metrics_available": {
+            "type": "boolean"
+          },
+          "security_measures_documented": {
+            "type": "boolean"
+          },
+          "code_of_practice_enrolled": {
+            "type": "boolean",
+            "description": "Enrolled in EU AI Office Code of Practice (if GPAI)"
+          },
+          "last_documentation_review": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "deployment_status": {
+        "type": "string",
+        "enum": ["development", "testing", "production", "archived"],
+        "description": "Current deployment status"
+      },
+      "last_audit_date": {
+        "type": "string",
+        "format": "date"
+      }
+    },
+    "required": [
+      "model_id",
+      "model_name",
+      "use_case",
+      "role",
+      "risk_classification",
+      "prohibited_practices_check"
+    ]
+  }
+}

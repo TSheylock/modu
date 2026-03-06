@@ -1,0 +1,32 @@
+{
+  "encryption_audit_schema": {
+    "audit_id": "ENC-{YYYYMMDD}-{UUID}",
+    "timestamp": "2025-12-18T04:00:00Z",
+    "database_encryption": {
+      "algorithm": "string (e.g., 'AES-256')",
+      "status": "enabled|disabled",
+      "key_rotation_schedule": "string (e.g., 'quarterly')",
+      "last_key_rotation": "date-time",
+      "key_storage_location": "string (e.g., 'AWS KMS', 'HashiCorp Vault')",
+      "keys_stored_separately": "boolean (must be true)"
+    },
+    "transport_security": {
+      "tls_version": "string (minimum '1.3')",
+      "certificate_issuer": "string",
+      "certificate_expiration": "date",
+      "certificate_valid": "boolean",
+      "protocols_disabled": ["SSLv3", "TLSv1.0", "TLSv1.1"]
+    },
+    "backup_encryption": {
+      "backups_encrypted": "boolean (must be true)",
+      "backup_key_separate": "boolean (must be true)",
+      "recovery_test_passed": "boolean (test quarterly)"
+    },
+    "access_controls": {
+      "mfa_required_for_data_access": "boolean",
+      "least_privilege_enforced": "boolean",
+      "audit_logging_enabled": "boolean",
+      "service_accounts_with_full_access": "integer (should be 0 in prod)"
+    }
+  }
+}

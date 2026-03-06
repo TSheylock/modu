@@ -1,0 +1,195 @@
+name: SASOK × Gemini CLI Integration
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # Ручной запуск
+    inputs:
+      analysis_type:
+        description: 'Тип анализа'
+        required: true
+        type: choice
+        options:
+          - code_audit
+          - security_scan
+          - performance_review
+          - full_analysis
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  packages: read
+
+env:
+  GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-1.5-pro' }}
+  GEMINI_MAX_TOKENS: ${{ vars.GEMINI_MAX_TOKENS || '4096' }}
+  NODE_VERSION: '20'
+
+jobs:
+  # Job 1: Установка и настройка
+  setup:
+    name: Setup Gemini CLI
+    runs-on: ubuntu-latest
+    outputs:
+      cli-version: ${{ steps.install.outputs.version }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install Gemini CLI
+        id: install
+        run: |
+          npm install -g @google/gemini-cli
+          echo "version=$(gemini --version)" >> $GITHUB_OUTPUT
+      
+      - name: Verify installation
+        run: |
+          which gemini
+          gemini --help
+  
+  # Job 2: Аудит кода
+  code-audit:
+    name: Code Audit with Gemini
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.inputs.analysis_type == 'code_audit' || github.event.inputs.analysis_type == 'full_analysis' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Полная история для анализа
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install Gemini CLI
+        run: npm install -g @google/gemini-cli
+      
+      - name: Run code audit
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_CLI_DEBUG: "false"
+        run: |
+          mkdir -p reports
+          
+          # Аудит кода
+          gemini -p "Проведи детальный аудит этого репозитория:
+          1. Анализ архитектуры и структуры кода
+          2. Поиск потенциальных уязвимостей безопасности
+          3. Оценка качества кода и соблюдения best practices
+          4. Рекомендации по улучшению
+          
+          Важно: НЕ выводи содержимое секретов, токенов или приватных ключей.
+          Формат: структурированный Markdown отчёт." > reports/code-audit.md
+      
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-audit-report
+          path: reports/code-audit.md
+          retention-days: 30
+      
+      - name: Comment PR (if applicable)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('reports/code-audit.md', 'utf8');
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🤖 Gemini Code Audit Report\n\n${report}`
+            });
+  
+  # Job 3: Анализ безопасности
+  security-scan:
+    name: Security Scan
+    needs: setup
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.analysis_type == 'security_scan' || github.event.inputs.analysis_type == 'full_analysis' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: Install Gemini CLI
+        run: npm install -g @google/gemini-cli
+      
+      - name: Security analysis
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          mkdir -p reports
+          
+          gemini -p "Проведи глубокий анализ безопасности:
+          1. Поиск уязвимостей в зависимостях
+          2. Проверка на SQL injection, XSS, CSRF
+          3. Анализ обработки пользовательского ввода
+          4. Проверка хранения и передачи секретов
+          5. OWASP Top 10 compliance
+          
+          Формат: JSON с категориями и severity levels." > reports/security-scan.json
+      
+      - name: Parse and fail if critical
+        run: |
+          # Проверка наличия критических уязвимостей
+          if grep -q '"severity": "critical"' reports/security-scan.json;
+            echo "❌ Критические уязвимости обнаружены!"
+            exit 1
+      
+      - name: Upload security report
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-report
+          path: reports/security-scan.json
+  
+  # Job 4: Нотификация в SASOK
+  notify-sasok:
+    name: Notify SASOK System
+    needs: [code-audit, security-scan]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Send to SASOK webhook
+        if: ${{ secrets.SASOK_WEBHOOK_URL != '' }}
+        run: |
+          curl -X POST "${{ secrets.SASOK_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-GitHub-Event: ${{ github.event_name }}" \
+            -H "X-GitHub-Run-ID: ${{ github.run_id }}" \
+            -d '{ 
+              "repository": "${{ github.repository }}",
+              "branch": "${{ github.ref_name }}",
+              "commit": "${{ github.sha }}",
+              "workflow": "${{ github.workflow }}",
+              "status": "${{ job.status }}",
+              "artifacts": ["code-audit-report", "security-scan-report"]
+            }'

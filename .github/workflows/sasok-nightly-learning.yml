@@ -1,0 +1,77 @@
+name: SASOK Nightly Self-Learning
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Каждую ночь в 2:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  packages: read
+
+jobs:
+  collect-metrics:
+    name: Collect Performance Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout @v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node @v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: |
+          npm install -g @google/gemini-cli
+          gh extension install github/gh-copilot
+      
+      - name: Analyze workflow runs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Получить последние 50 запусков workflow
+          gh api repos/${{ github.repository }}/actions/runs \
+            --jq '.workflow_runs[:50]' > workflow-history.json
+          
+          # Анализ через Gemini
+          gemini -p "Проанализируй историю workflow:
+          $(cat workflow-history.json)
+          
+          Задачи:
+          1. Найди паттерны ошибок
+          2. Определи bottleneck'и
+          3. Предложи оптимизации
+          4. Генерируй новые пресеты для улучшения
+          
+          Формат: JSON с recommendations и preset_updates" > analysis.json
+      
+      - name: Create improvement PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Создать новую ветку
+          git checkout -b sasok-improvements-$(date +%Y%m%d)
+          
+          # Применить рекомендации (здесь можно добавить скрипт обработки)
+          # ...
+          
+          # Создать PR
+          gh pr create \
+            --title "🤖 SASOK Self-Learning: Automated Improvements" \
+            --body "Автоматически сгенерированные улучшения на основе анализа метрик" \
+            --label "automation,sasok-learning"
+      
+      - name: Upload metrics
+        uses: actions/upload-artifact @v4
+        with:
+          name: learning-metrics
+          path: |
+            workflow-history.json
+            analysis.json

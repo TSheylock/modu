@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SASOK User Consent Record",
+  "type": "object",
+  "properties": {
+    "consent_id": {
+      "type": "string",
+      "description": "Unique identifier (UUID)"
+    },
+    "user_id": {
+      "type": "string",
+      "description": "Anonymized user identifier (hash, not linked to personal data)"
+    },
+    "timestamp_given": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 with millisecond precision"
+    },
+    "consent_version": {
+      "type": "string",
+      "description": "Policy version user consented to (e.g., 'v2.1-2025-12-01')"
+    },
+    "consent_method": {
+      "type": "string",
+      "enum": ["cookie_banner", "signup_form", "api_request", "email_confirmation"]
+    },
+    "user_agent": {
+      "type": "string",
+      "description": "Browser/device info (for audit purposes)"
+    },
+    "ip_address": {
+      "type": "string",
+      "description": "Anonymized IP (last octet removed) for geographic verification"
+    },
+    "processing_activities": {
+      "type": "array",
+      "description": "Granular consent for each data use",
+      "items": {
+        "type": "object",
+        "properties": {
+          "activity_id": {
+            "type": "string",
+            "enum": [
+              "analytics",
+              "marketing_email",
+              "personalization",
+              "third_party_sharing",
+              "ai_training_general",
+              "emotion_inference"
+            ]
+          },
+          "activity_description": {
+            "type": "string"
+          },
+          "user_consent": {
+            "type": "boolean"
+          },
+          "consent_timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": ["activity_id", "user_consent"]
+      }
+    },
+    "withdrawal_timestamp": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "When user withdrew consent (null if active)"
+    },
+    "withdrawal_method": {
+      "type": ["string", "null"],
+      "enum": ["email_link", "account_settings", "api_call"],
+      "description": "How user withdrew consent"
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Consent expires after 12 months (re-confirmation required)"
+    },
+    "audit_notes": {
+      "type": "string",
+      "description": "Internal notes for compliance audit"
+    }
+  },
+  "required": [
+    "consent_id",
+    "user_id",
+    "timestamp_given",
+    "consent_version",
+    "consent_method",
+    "processing_activities",
+    "expiry_date"
+  ]
+}

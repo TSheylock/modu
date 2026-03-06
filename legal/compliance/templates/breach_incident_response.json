@@ -1,0 +1,25 @@
+{
+  "breach_incident_template": {
+    "incident_id": "BREACH-{YYYYMMDD}-{UUID}",
+    "timestamp_discovered": "ISO 8601",
+    "incident_description": "string",
+    "affected_data_categories": ["array of data types"],
+    "estimated_individuals_affected": "integer",
+    "severity": "low|medium|high|critical",
+    "notification_deadline": "72 hours from discovery (per Article 33)",
+    "notification_to_dpa": {
+      "required": true,
+      "authority": "string (e.g., 'Irish Data Protection Commission')",
+      "email": "string",
+      "deadline": "72 hours"
+    },
+    "notification_to_individuals": {
+      "required": "boolean (if high risk)",
+      "method": ["email", "sms", "website_notice"],
+      "deadline": "without undue delay"
+    },
+    "remediation_steps": ["array of actions"],
+    "root_cause_analysis": "string",
+    "measures_to_prevent_recurrence": "string"
+  }
+}

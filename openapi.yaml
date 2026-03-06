@@ -1,0 +1,260 @@
+
+openapi: 3.0.1
+info:
+  title: SASOK Backend API
+  description: API for the SASOK symbiotic cognitive-emotional platform.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Returns the operational status of the API.
+      responses:
+        '200':
+          description: API is healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+
+  /api/ai/emotion-analysis:
+    post:
+      summary: Analyze Emotion
+      description: Receives multimodal data and returns an emotion analysis. (Placeholder)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example: {"raw_data": "..."}
+      responses:
+        '200':
+          description: Successful analysis.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  emotion:
+                    type: string
+                  confidence:
+                    type: number
+        '500':
+          description: Internal Server Error
+
+  /api/ai/nlp-process:
+    post:
+      summary: Process NLP from Text
+      description: Processes raw text to extract intent, entities, and sentiment. (Placeholder)
+      parameters:
+        - in: query
+          name: text
+          schema:
+            type: string
+          required: true
+          description: The text to analyze.
+      responses:
+        '200':
+          description: Successful analysis.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  intent:
+                    type: string
+                  entities:
+                    type: array
+                    items: {}
+                  sentiment:
+                    type: string
+        '500':
+          description: Internal Server Error
+
+  /api/nlp/process-and-update:
+    post:
+      summary: Process NLP and Update Graph
+      description: Processes a message using NLP, extracts entities, and updates the Neo4j graph.
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: message
+          schema:
+            type: string
+          required: true
+          description: The message to process.
+      responses:
+        '200':
+          description: Graph updated successfully.
+        '401':
+          description: Invalid API key.
+        '500':
+          description: Internal Server Error
+
+  /api/web3/connect:
+    post:
+      summary: Connect Wallet
+      description: Connects a Web3 wallet address to the system. (Placeholder)
+      parameters:
+        - in: query
+          name: wallet_address
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Wallet connected.
+        '500':
+          description: Internal Server Error
+
+  /api/web3/transactions/{address}:
+    get:
+      summary: Get Web3 Transactions
+      description: Fetches transaction history for a given wallet address. (Placeholder)
+      parameters:
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful retrieval.
+        '500':
+          description: Internal Server Error
+
+  /api/analytics/log:
+    post:
+      summary: Log User Interaction
+      description: Logs an interaction event for analytics.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInteraction'
+      responses:
+        '200':
+          description: Interaction logged.
+        '500':
+          description: Internal Server Error
+
+  /api/analytics/stats:
+    get:
+      summary: Get Analytics Stats
+      description: Retrieves general analytics statistics. (Placeholder)
+      responses:
+        '200':
+          description: Successful retrieval.
+        '500':
+          description: Internal Server Error
+          
+  /api/graph/data:
+    get:
+      summary: Get Graph Data
+      description: Retrieves all nodes and edges from the Neo4j database.
+      responses:
+        '200':
+          description: Successful retrieval of graph data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nodes:
+                    type: array
+                    items: {}
+                  edges:
+                    type: array
+                    items: {}
+        '500':
+          description: Internal Server Error
+
+  /api/graph/update-feedback:
+    post:
+      summary: Update Graph from Feedback
+      description: Updates node or edge properties based on user feedback.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                node_id:
+                  type: string
+                edge_type:
+                  type: string
+                feedback:
+                  type: string
+                  enum: [positive, negative]
+                weight_change:
+                  type: number
+      responses:
+        '200':
+          description: Graph updated successfully.
+        '401':
+          description: Invalid API key.
+        '500':
+          description: Internal Server Error
+
+  /api/graph/update-node:
+    post:
+      summary: Update a Graph Node
+      description: Updates properties of a specific node in the graph.
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                node_id:
+                  type: string
+              example: {"node_id": "some_node", "new_property": "value"}
+      responses:
+        '200':
+          description: Node updated successfully.
+        '400':
+          description: Bad Request (e.g., missing key).
+        '401':
+          description: Invalid API key.
+        '500':
+          description: Internal Server Error
+
+components:
+  schemas:
+    UserInteraction:
+      type: object
+      properties:
+        user_id:
+          type: string
+        interaction_type:
+          type: string
+        data:
+          type: object
+        timestamp:
+          type: string
+          format: date-time
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
