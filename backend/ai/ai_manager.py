@@ -1,7 +1,13 @@
 # ASR Service Adapter for SASOK
 import requests
 import os
+import tempfile
+import base64
+import wave
 from typing import Dict, Any, Optional
+import logging
+import numpy as np
+import librosa
 
 class ASRServiceAdapter:
     """
@@ -86,15 +92,15 @@ def process_audio_for_emotion(audio_path: str) -> Dict[str, Any]:
         "status": "success",
         "emotion": combined_emotion,
         "text": transcription
-    }# Add to backend/ai/emotion_detector.py
+    }
+
+# Emotion processing class
+class EmotionProcessor:
+    """Process audio data for emotion analysis with ASR integration"""
     
-    import requests
-    import os
-    import tempfile
-    import base64
-    import wave
-    import numpy as np
-    import librosa
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+        self.emotions = ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
     
     async def process_audio(self, audio_data: str) -> Dict:
         """

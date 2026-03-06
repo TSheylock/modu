@@ -2,17 +2,25 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Tuple
 import logging
 from datetime import datetime
 import optuna
-from sklearn.metrics import f1_score, roc_auc_score, precision_recall_fscore_support
-import json
-import os
-from pathlib import Path
-import shap
-import lime
-import lime.lime_text
+from sklearn.metrics import precision_recall_fscore_support
+
+# Optional dependencies for model explanations (not available on Python 3.14)
+try:
+    import shap
+    SHAP_AVAILABLE = True
+except ImportError:
+    SHAP_AVAILABLE = False
+
+try:
+    import lime
+    import lime.lime_text
+    LIME_AVAILABLE = True
+except ImportError:
+    LIME_AVAILABLE = False
 
 class EmotionDataset(Dataset):
     def __init__(self, features: np.ndarray, labels: np.ndarray):
@@ -54,7 +62,7 @@ class TrainingPipeline:
         )
         self.model = None
         self.optimizer = None
-        self.criterion = None
+        self.criterion = nn.CrossEntropyLoss()
         self.best_params = None
         self.training_history = []
 
@@ -257,6 +265,11 @@ class TrainingPipeline:
         """Generate model explanations"""
         try:
             if method == 'shap':
+                if not SHAP_AVAILABLE:
+                    return {
+                        "success": False,
+                        "error": "SHAP library not available (requires Python <3.14)"
+                    }
                 explainer = shap.DeepExplainer(
                     self.model,
                     torch.FloatTensor(features[:100]).to(self.device)
@@ -274,6 +287,11 @@ class TrainingPipeline:
                 }
             
             elif method == 'lime':
+                if not LIME_AVAILABLE:
+                    return {
+                        "success": False,
+                        "error": "LIME library not available (requires Python <3.14)"
+                    }
                 explainer = lime.lime_text.LimeTextExplainer()
                 exp = explainer.explain_instance(
                     features,

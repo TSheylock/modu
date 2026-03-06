@@ -1,16 +1,25 @@
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import List, Optional
 import uvicorn
 from datetime import datetime
-import json
 import os
 from neo4j import GraphDatabase
 import spacy
+from motor.motor_asyncio import AsyncIOMotorClient
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Load spaCy model (ensure 'en_core_web_sm' is downloaded)
-nlp = spacy.load('en_core_web_sm')
+try:
+    nlp = spacy.load('en_core_web_sm')
+except Exception as e:
+    print(f"Warning: spaCy model not found, AI features may be limited. {e}")
+    nlp = None
+
 
 # Create FastAPI app
 app = FastAPI(title="SASOK Backend API")
@@ -28,13 +37,22 @@ app.add_middleware(
 NEO4J_URI = os.getenv('NEO4J_URI', 'bolt://localhost:7687')
 NEO4J_USER = os.getenv('NEO4J_USER', 'neo4j')
 NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD', 'password')
+NEO4J_DATABASE = os.getenv('NEO4J_DATABASE', 'neo4j')
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
 
+# MongoDB driver setup
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
+mongo_client = AsyncIOMotorClient(MONGO_URI)
+db = mongo_client.sasok
+
+
 API_KEY = os.getenv('API_KEY', 'default_key')  # Set via environment variable
+
 
 async def verify_api_key(x_api_key: str = Header(None)):
     if x_api_key != API_KEY:
         raise HTTPException(status_code=401, detail="Invalid API key")
+
 
 # Models
 class EmotionAnalysis(BaseModel):
@@ -43,12 +61,144 @@ class EmotionAnalysis(BaseModel):
     confidence: float
     user_id: str
 
+
 class Web3Transaction(BaseModel):
     transaction_hash: str
     from_address: str
     to_address: str
     value: str
     timestamp: datetime
+
+
+# Payment Models
+class PaymentRequest(BaseModel):
+    amount: float
+    currency: str = "USD"
+    payment_method: str = "card"
+
+
+@app.post("/api/pay")
+async def process_payment(payment: PaymentRequest):
+    # Mock payment processing
+    return {
+        "status": "success",
+        "transaction_id": f"txn_{int(datetime.now().timestamp())}",
+        "message": f"Successfully processed payment of {payment.amount} {payment.currency}",
+        "timestamp": datetime.now()
+    }
+
+@app.get("/api/products")
+async def get_products():
+    return [
+        {"id": 1, "name": "Premium Insight", "price": 99.99, "description": "Deep emotional analysis of your psyche."},
+        {"id": 2, "name": "Golden Ticket", "price": 499.99, "description": "Unlock all features forever."},
+        {"id": 3, "name": "Developer Support", "price": 9.99, "description": "Buy the developer a coffee."}
+    ]
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    return """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SASOK Premium Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: '#FFD700',
+                        dark: '#1a1a1a',
+                        card: '#2d2d2d'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #1a1a1a; color: white; font-family: 'Inter', sans-serif; }
+        .gold-glow { text-shadow: 0 0 10px #FFD700; }
+        .card-hover:hover { transform: translateY(-5px); transition: transform 0.3s ease; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <nav class="p-6 flex justify-between items-center border-b border-gray-800">
+        <h1 class="text-3xl font-bold text-gold gold-glow">SASOK</h1>
+        <div class="space-x-4">
+            <button class="text-gray-300 hover:text-white">Dashboard</button>
+            <button class="text-gray-300 hover:text-white">Profile</button>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="text-center mb-16">
+            <h2 class="text-5xl font-bold mb-4">Unlock Your True Potential</h2>
+            <p class="text-xl text-gray-400">Invest in yourself. Deep analysis requires premium access.</p>
+        </div>
+
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Products will be loaded here -->
+            <div class="animate-pulse bg-card h-96 rounded-xl"></div>
+            <div class="animate-pulse bg-card h-96 rounded-xl"></div>
+            <div class="animate-pulse bg-card h-96 rounded-xl"></div>
+        </div>
+    </main>
+
+    <footer class="p-6 text-center text-gray-500 border-t border-gray-800">
+        &copy; 2024 SASOK Corp. All rights reserved.
+    </footer>
+
+    <script>
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                const products = await response.json();
+                const grid = document.getElementById('products-grid');
+                grid.innerHTML = '';
+
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-card p-8 rounded-xl flex flex-col items-center text-center card-hover border border-gray-700';
+                    card.innerHTML = `
+                        <div class="h-40 w-40 bg-gray-700 rounded-full mb-6 flex items-center justify-center text-4xl">💎</div>
+                        <h3 class="text-2xl font-bold mb-2">${product.name}</h3>
+                        <p class="text-gray-400 mb-6 flex-grow">${product.description}</p>
+                        <div class="text-3xl font-bold text-gold mb-6">$${product.price}</div>
+                        <button onclick="buy(${product.price}, '${product.name}')" class="w-full bg-gold text-black font-bold py-3 px-6 rounded-lg hover:bg-yellow-400 transition">
+                            PURCHASE NOW
+                        </button>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        async function buy(amount, name) {
+            try {
+                const response = await fetch('/api/pay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: amount, currency: 'USD', payment_method: 'one-click' })
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    alert(`Successfully purchased ${name}! Thank you for your investment.`);
+                }
+            } catch (error) {
+                alert('Payment failed. Please try again.');
+            }
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
+    """
 
 class UserInteraction(BaseModel):
     user_id: str
@@ -58,13 +208,13 @@ class UserInteraction(BaseModel):
 
 # Function to add or update a node
 async def add_or_update_node(node_data: dict):
-    with driver.session() as session:
+    with driver.session(database=NEO4J_DATABASE) as session:
         session.run("MERGE (n:Node {id: $id}) SET n.label = $label, n.type = $type, n.valence = $valence, n.intensity = $intensity RETURN n", node_data)
     return {"status": "node added or updated"}
 
 # Function to add or update an edge
 async def add_or_update_edge(edge_data: dict):
-    with driver.session() as session:
+    with driver.session(database=NEO4J_DATABASE) as session:
         session.run("MATCH (a:Node {id: $source}), (b:Node {id: $target}) MERGE (a)-[r:RELATIONSHIP {type: $type}]->(b) SET r.weight = $weight, r.timestamp = $timestamp RETURN r", edge_data)
     return {"status": "edge added or updated"}
 
@@ -163,7 +313,7 @@ async def get_stats():
 # New route for graph data
 @app.get("/api/graph/data")
 async def get_graph_data():
-    with driver.session() as session:
+    with driver.session(database=NEO4J_DATABASE) as session:
         nodes_result = session.run("MATCH (n) RETURN id(n) as id, labels(n) as labels, properties(n) as properties")
         edges_result = session.run("MATCH ()-[r]-() RETURN id(r) as id, type(r) as type, startNode(r) as start, endNode(r) as end, properties(r) as properties")
         nodes = [record.data() for record in nodes_result]
@@ -181,12 +331,12 @@ async def update_feedback(feedback_data: dict, x_api_key: str = Depends(verify_a
         
         # Update node intensity or other attributes
         if node_id:
-            with driver.session() as session:
+            with driver.session(database=NEO4J_DATABASE) as session:
                 session.run("MATCH (n:Node {id: $node_id}) SET n.intensity = n.intensity + $weight_change RETURN n", {'node_id': node_id, 'weight_change': weight_change})
         
         # Update edge weight
         if edge_type:
-            with driver.session() as session:
+            with driver.session(database=NEO4J_DATABASE) as session:
                 session.run("MATCH ()-[r:RELATIONSHIP {type: $edge_type}]->() SET r.weight = r.weight + $weight_change RETURN r", {'edge_type': edge_type, 'weight_change': weight_change})
         
         return {"status": "graph updated based on feedback"}
@@ -197,7 +347,7 @@ async def update_feedback(feedback_data: dict, x_api_key: str = Depends(verify_a
 @app.post("/api/graph/update-node", dependencies=[Depends(verify_api_key)])
 async def update_node(node_data: dict, x_api_key: str = Depends(verify_api_key)):
     try:
-        with driver.session() as session:
+        with driver.session(database=NEO4J_DATABASE) as session:
             session.run("MATCH (n:Node {id: $node_id}) SET n += $properties RETURN n", {'node_id': node_data['node_id'], 'properties': node_data})
         return {"status": "node updated"}
     except KeyError as e:
