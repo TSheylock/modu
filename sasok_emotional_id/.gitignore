@@ -1,0 +1,22 @@
+# AES key — never commit
+*.key
+*.pem
+
+# Environment file with secrets
+.env
+
+# Output data (raw encrypted records)
+outputs/
+logs/
+quarantine/
+reports/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Virtual env
+venv/
+.venv/

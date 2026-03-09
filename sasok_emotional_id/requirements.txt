@@ -1,0 +1,32 @@
+# SASOK Emotional ID — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# HTTP client (OWL API calls)
+requests>=2.31.0
+
+# NLP + sentiment analysis
+nltk>=3.8.0
+
+# Encryption
+pycryptodome>=3.20.0
+
+# Data / IO
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Statistics
+scipy>=1.11.0
+
+# Visualisation (optional — for generate_report.py charts)
+matplotlib>=3.7.0
+
+# YAML config (optional)
+pyyaml>=6.0
+
+# Environment variables
+python-dotenv>=1.0.0
+
+# ── Heavier optional dependencies ──────────────────────────────────────────
+# Russian spaCy model — uncomment if you want spaCy-based tokenisation/POS:
+# spacy>=3.7.0
+# ru-core-news-sm @ https://github.com/explosion/spacy-models/releases/download/ru_core_news_sm-3.7.0/ru_core_news_sm-3.7.0-py3-none-any.whl
